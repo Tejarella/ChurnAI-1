@@ -12,13 +12,14 @@
 
 ## 📸 Screenshots
 
-| Home Page | Prediction Page |
+| Home Page | Form Page |
 |-----------|----------------|
-| ![Home](home.png) | ![Prediction](prediction.png) |
+| ![Home](Screenshot 2025-10-17 092553)" />
+) | ![Prediction](Screenshot 2025-10-17 092645) |
 
 | Data Insights | Model Accuracy |
 |---------------|----------------|
-| ![Data Insights](insights.png) | ![Model Accuracy](accuracy.png) |
+| ![Data Insights](Screenshot 2025-10-17 093448) | ![Model Accuracy](Screenshot 2025-10-17 092700) |
 
 ---
 
