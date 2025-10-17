@@ -14,12 +14,12 @@
 
 | Home Page | Form Page |
 |-----------|----------------|
-| ![Home](Screenshot 2025-10-17 092553.png)" />
-) | ![Prediction](Screenshot 2025-10-17 092645.png) |
+| ![Home](92553.png)" />
+) | ![Prediction](92645.png) |
 
 | Data Insights | Model Accuracy |
 |---------------|----------------|
-| ![Data Insights](Screenshot 2025-10-17 093448.png) | ![Model Accuracy](Screenshot 2025-10-17 092700.png) |
+| ![Data Insights](93448.png) | ![Model Accuracy](92700.png) |
 
 ---
 
