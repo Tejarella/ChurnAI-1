@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChurnAI - AI-Powered Customer Retention</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveGrid 20s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .orb1 { width: 400px; height: 400px; background: #6366f1; top: 10%; left: 10%; animation-delay: 0s; }
+        .orb2 { width: 300px; height: 300px; background: #8b5cf6; bottom: 10%; right: 10%; animation-delay: 2s; }
+        .orb3 { width: 250px; height: 250px; background: #06b6d4; top: 50%; left: 50%; animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, 30px) scale(1.1); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 25px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(10, 14, 39, 0.7);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .cta-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.6);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 20px 50px;
+        }
+
+        .hero-content h1 {
+            font-size: 72px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .hero-content p {
+            font-size: 20px;
+            color: #a0a0c0;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 60px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #a0a0c0;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        /* Info Section */
+        .info-section {
+            padding: 100px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #a0a0c0;
+            font-size: 18px;
+            margin-bottom: 60px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .info-card {
+            background: rgba(26, 31, 58, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .info-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-description {
+            color: #a0a0c0;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Risk Levels */
+        .risk-section {
+            padding: 100px 50px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .risk-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .risk-card {
+            background: rgba(26, 31, 58, 0.5);
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .risk-card.high {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .risk-card.low {
+            border-color: rgba(34, 197, 94, 0.5);
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .risk-badge.high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .risk-badge.low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .risk-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .risk-description {
+            color: #a0a0c0;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .risk-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .risk-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #a0a0c0;
+        }
+
+        .risk-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 50px;
+            text-align: center;
+        }
+
+        .cta-box {
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 30px;
+            padding: 60px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-box h2 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .cta-box p {
+            font-size: 18px;
+            color: #a0a0c0;
+            margin-bottom: 40px;
+        }
+
+        .cta-btn-large {
+            padding: 18px 50px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .cta-btn-large:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 { font-size: 42px; }
+            .hero-stats { flex-direction: column; gap: 30px; }
+            .risk-cards { grid-template-columns: 1fr; }
+            nav { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="orb orb3"></div>
+    </div>
+
+    <nav>
+        <div class="logo">ChurnAI</div>
+        <a href="/predict-form" class="cta-btn">Start Prediction</a>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Predict Customer Churn<br>Before It Happens</h1>
+            <p>Harness the power of AI to identify at-risk customers and take proactive retention measures. Transform data into actionable insights.</p>
+            <a href="/predict-form" class="cta-btn-large">Get Started →</a>
+            
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10x</div>
+                    <div class="stat-label">ROI Increase</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">Real-time</div>
+                    <div class="stat-label">Predictions</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="info-section">
+        <h2 class="section-title">What is Customer Churn?</h2>
+        <p class="section-subtitle">Customer churn is when customers stop doing business with your company. Understanding and predicting churn is crucial for sustainable growth.</p>
+        
+        <div class="cards-grid">
+            <div class="info-card">
+                <div class="card-icon">📊</div>
+                <h3 class="card-title">What is Churn?</h3>
+                <p class="card-description">Churn rate measures the percentage of customers who stop using your service during a given time period. A high churn rate indicates customers are leaving faster than you're acquiring new ones.</p>
+            </div>
+
+            <div class="info-card">
+                <div class="card-icon">🎯</div>
+                <h3 class="card-title">Why It Matters</h3>
+                <p class="card-description">Acquiring new customers costs 5-25x more than retaining existing ones. By predicting churn, businesses can focus retention efforts on high-risk customers and maximize ROI.</p>
+            </div>
+
+            <div class="info-card">
+                <div class="card-icon">🚀</div>
+                <h3 class="card-title">Business Impact</h3>
+                <p class="card-description">Reducing churn by just 5% can increase profits by 25-95%. Predictive models help businesses take proactive action before customers leave, protecting revenue streams.</p>
+            </div>
+
+            <div class="info-card">
+                <div class="card-icon">🤖</div>
+                <h3 class="card-title">How AI Helps</h3>
+                <p class="card-description">Machine learning analyzes customer behavior patterns, engagement metrics, and historical data to identify at-risk customers with high accuracy, enabling timely interventions.</p>
+            </div>
+
+            <div class="info-card">
+                <div class="card-icon">💼</div>
+                <h3 class="card-title">Business Use Cases</h3>
+                <p class="card-description">E-commerce platforms use churn prediction to offer personalized discounts, subscription services optimize retention campaigns, and enterprises prioritize customer success efforts.</p>
+            </div>
+
+            <div class="info-card">
+                <div class="card-icon">⚡</div>
+                <h3 class="card-title">Take Action</h3>
+                <p class="card-description">With ChurnAI predictions, implement targeted retention strategies like loyalty programs, personalized offers, improved support, or product enhancements to keep customers engaged.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="risk-section">
+        <h2 class="section-title">Understanding Risk Levels</h2>
+        <p class="section-subtitle">Our AI model classifies customers into risk categories to help you prioritize retention efforts</p>
+        
+        <div class="risk-cards">
+            <div class="risk-card high">
+                <span class="risk-badge high">HIGH RISK</span>
+                <h3 class="risk-title">Churn Likely</h3>
+                <p class="risk-description">Customers classified as high risk show strong indicators of potential churn and require immediate attention.</p>
+                <ul class="risk-list">
+                    <li>Low engagement and satisfaction scores</li>
+                    <li>Decreased order frequency</li>
+                    <li>Multiple complaints registered</li>
+                    <li>Long gaps since last purchase</li>
+                    <li>Minimal app usage time</li>
+                </ul>
+            </div>
+
+            <div class="risk-card low">
+                <span class="risk-badge low">LOW RISK</span>
+                <h3 class="risk-title">Retain Customer</h3>
+                <p class="risk-description">Customers in this category demonstrate healthy engagement patterns and are likely to continue their relationship.</p>
+                <ul class="risk-list">
+                    <li>High satisfaction and engagement</li>
+                    <li>Regular purchase patterns</li>
+                    <li>Active app usage</li>
+                    <li>Positive interaction history</li>
+                    <li>Strong loyalty indicators</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="cta-box">
+            <h2>Ready to Reduce Churn?</h2>
+            <p>Start making data-driven decisions to retain your most valuable customers. Our AI-powered prediction takes seconds.</p>
+            <a href="/predict-form" class="cta-btn-large">Start Your First Prediction →</a>
+        </div>
+    </section>
+</body>
+</html>

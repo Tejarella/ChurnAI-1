@@ -3,34 +3,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediction Result</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <title>Prediction Result - ChurnAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f0f8ff; /* Light blue background color */
+            font-family: 'Inter', sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .prediction-container {
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveGrid 20s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        {% if data['risk'] == 'High Risk' %}
+        .orb1 { width: 400px; height: 400px; background: #ef4444; top: 20%; right: 10%; }
+        .orb2 { width: 300px; height: 300px; background: #dc2626; bottom: 20%; left: 10%; animation-delay: 2s; }
+        {% else %}
+        .orb1 { width: 400px; height: 400px; background: #22c55e; top: 20%; right: 10%; }
+        .orb2 { width: 300px; height: 300px; background: #16a34a; bottom: 20%; left: 10%; animation-delay: 2s; }
+        {% endif %}
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, 30px) scale(1.1); }
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 0 20px;
             text-align: center;
-            margin-top: 50px;
         }
-        .prediction {
-            font-size: 20px;
+
+        .result-card {
+            background: rgba(26, 31, 58, 0.6);
+            border: 2px solid {% if data['risk'] == 'High Risk' %}rgba(239, 68, 68, 0.5){% else %}rgba(34, 197, 94, 0.5){% endif %};
+            border-radius: 40px;
+            padding: 60px 50px;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
         }
-        .churn {
-            color: red;
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: {% if data['risk'] == 'High Risk' %}
+                radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%)
+            {% else %}
+                radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%)
+            {% endif %};
+            animation: rotate 20s linear infinite;
         }
-        .not-churn {
-            color: green;
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .icon-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            position: relative;
+            z-index: 1;
+            {% if data['risk'] == 'High Risk' %}
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
+            border: 3px solid rgba(239, 68, 68, 0.5);
+            {% else %}
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.2));
+            border: 3px solid rgba(34, 197, 94, 0.5);
+            {% endif %}
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            {% if data['risk'] == 'High Risk' %}
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 2px solid rgba(239, 68, 68, 0.4);
+            {% else %}
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 2px solid rgba(34, 197, 94, 0.4);
+            {% endif %}
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            {% if data['risk'] == 'High Risk' %}
+            color: #ef4444;
+            {% else %}
+            color: #22c55e;
+            {% endif %}
+        }
+
+        .status-text {
+            font-size: 24px;
+            color: #a0a0c0;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .probability-container {
+            background: rgba(10, 14, 39, 0.6);
+            border-radius: 25px;
+            padding: 30px;
+            margin: 40px 0;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .probability-label {
+            color: #a0a0c0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .probability-value {
+            font-size: 56px;
+            font-weight: 800;
+            {% if data['risk'] == 'High Risk' %}
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            {% else %}
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            {% endif %}
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(10, 14, 39, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            {% if data['risk'] == 'High Risk' %}
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+            {% else %}
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            {% endif %}
+            border-radius: 10px;
+            width: {{ data['predict_probability'] }}%;
+            animation: fillBar 1.5s ease-out;
+            box-shadow: 0 0 20px {% if data['risk'] == 'High Risk' %}rgba(239, 68, 68, 0.5){% else %}rgba(34, 197, 94, 0.5){% endif %};
+        }
+
+        @keyframes fillBar {
+            0% { width: 0%; }
+            100% { width: {{ data['predict_probability'] }}%; }
+        }
+
+        .recommendation {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+        }
+
+        .recommendation h3 {
+            color: #6366f1;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendation li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #a0a0c0;
+            line-height: 1.6;
+        }
+
+        .recommendation li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        .actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 30px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .result-card { padding: 40px 30px; }
+            h1 { font-size: 36px; }
+            .probability-value { font-size: 42px; }
+            .actions { flex-direction: column; }
         }
     </style>
 </head>
 <body>
+    <div class="bg-animation">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+    </div>
+
     <div class="container">
-        <div class="prediction-container">
-            <h1>Prediction Result</h1>
-            <p class="prediction">Model predicted that Customer is likely to:</p>
-            <h2 class="{% if data['prediction'] == 'Churn' %}churn{% else %}not-churn{% endif %}"> {{ data['prediction'] }} </h2>
-            <p class="prediction">Probability of Customer Churning: {{ data['predict_probabality'] }}</p>
+        <div class="result-card">
+            <div class="icon-container">
+                {% if data['risk'] == 'High Risk' %}
+                ⚠️
+                {% else %}
+                ✅
+                {% endif %}
+            </div>
+
+            <div class="risk-badge">{{ data['risk'] }}</div>
+            <h1>{{ data['risk_status'] }}</h1>
+            <p class="status-text">
+                {% if data['risk'] == 'High Risk' %}
+                This customer shows strong indicators of churn
+                {% else %}
+                This customer is likely to remain engaged
+                {% endif %}
+            </p>
+
+            <div class="probability-container">
+                <div class="probability-label">Churn Probability</div>
+                <div class="probability-value">{{ data['predict_probability'] }}%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="recommendation">
+                <h3>💡 Recommended Actions</h3>
+                <ul>
+                    {% if data['risk'] == 'High Risk' %}
+                    <li>Immediate outreach with personalized retention offer</li>
+                    <li>Assign dedicated account manager for support</li>
+                    <li>Offer exclusive discounts or loyalty rewards</li>
+                    <li>Conduct satisfaction survey to identify pain points</li>
+                    <li>Review recent interactions and complaints</li>
+                    {% else %}
+                    <li>Continue current engagement strategies</li>
+                    <li>Nurture with occasional personalized communications</li>
+                    <li>Offer loyalty rewards to maintain satisfaction</li>
+                    <li>Monitor for any changes in behavior patterns</li>
+                    <li>Request reviews and referrals</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="actions">
+                <a href="/predict-form" class="btn btn-primary">🔄 New Prediction</a>
+                <a href="/" class="btn btn-secondary">← Back to Home</a>
+            </div>
         </div>
     </div>
 </body>

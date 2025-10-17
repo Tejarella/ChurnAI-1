@@ -1,100 +1,85 @@
 from flask import Flask, render_template, request
-import numpy as np
 import pickle
 import json
+import numpy as np
 
 app = Flask(__name__)
 
-def churn_prediction(tenure, citytier, warehousetohome, gender, hourspendonapp, numberofdeviceregistered, satisfactionscore, maritalstatus, numberofaddress, complain, orderamounthikefromlastyear, couponused, ordercount, daysincelastorder, cashbackamount):
-    with open('end_to_end_deployment/models/churn_prediction_model.pkl', 'rb') as f:
-        model = pickle.load(f)
+# Load model and columns
+model = pickle.load(open("models/churn_prediction_model.pkl", "rb"))
+with open("models/columns.json", "r") as f:
+    data_columns = json.load(f)["data_columns"]
 
-    with open("end_to_end_deployment/models/columns.json", "r") as f:
-        data_columns = json.load(f)['data_columns']
+@app.route("/")
+def home():
+    return render_template("landing.html")
 
-    input_data = [
-        tenure, citytier, warehousetohome, gender,
-        hourspendonapp, numberofdeviceregistered, satisfactionscore, maritalstatus,
-        numberofaddress, complain, orderamounthikefromlastyear, couponused, ordercount, daysincelastorder, cashbackamount
-    ]
+@app.route("/predict-form")
+def predict_form():
+    return render_template("index.html")
 
-    # Convert input_data to a dictionary with appropriate keys
-    input_dict = {
-        "tenure": tenure,
-        "citytier": citytier,
-        "warehousetohome": warehousetohome,
-        "gender": gender,
-        "hourspendonapp": hourspendonapp,
-        "numberofdeviceregistered": numberofdeviceregistered,
-        "satisfactionscore": satisfactionscore,
-        "maritalstatus": maritalstatus,
-        "numberofaddress": numberofaddress,
-        "complain": complain,
-        "orderamounthikefromlastyear": orderamounthikefromlastyear,
-        "couponused": couponused,
-        "ordercount": ordercount,
-        "daysincelastorder": daysincelastorder,
-        "cashbackamount": cashbackamount
-    }
+@app.route("/predict", methods=["POST"])
+def predict():
+    try:
+        # Extract numeric inputs
+        tenure = float(request.form["tenure"])
+        citytier = float(request.form["citytier"])
+        warehousetohome = float(request.form["warehousetohome"])
+        hourspendonapp = float(request.form["hourspendonapp"])
+        numberofdeviceregistered = float(request.form["numberofdeviceregistered"])
+        satisfactionscore = float(request.form["satisfactionscore"])
+        numberofaddress = float(request.form["numberofaddress"])
+        complain = float(request.form["complain"])
+        orderamounthikefromlastyear = float(request.form["orderamounthikefromlastyear"])
+        couponused = float(request.form["couponused"])
+        ordercount = float(request.form["ordercount"])
+        daysincelastorder = float(request.form["daysincelastorder"])
+        cashbackamount = float(request.form["cashbackamount"])
 
-    # One-hot encode categorical variables
-    for col in data_columns:
-        if col in input_dict and isinstance(input_dict[col], str):
-            input_dict[col] = input_dict[col].lower().replace(' ', '_')
+        # Categorical inputs
+        gender = request.form["gender"]
+        maritalstatus = request.form["maritalstatus"]
 
-    # Create a list of zeros for all columns
-    input_array = np.zeros(len(data_columns))
-
-    # Fill the input array with the values from input_dict
-    for i, col in enumerate(data_columns):
-        if col in input_dict:
-            input_array[i] = input_dict[col]
-        elif col in input_dict.keys():
-            # One-hot encode the categorical variables
-            if f"{col}_{input_dict[col]}" in data_columns:
-                input_array[data_columns.index(f"{col}_{input_dict[col]}")] = 1
-
-    output_probab = model.predict_proba([input_array])[0][1]
-    return round(output_probab, 4)  # Round to 4 decimal places
-
-@app.route('/', methods=['GET', 'POST'])
-def index_page():
-    if request.method == 'POST':
-        # Retrieve form data
-        form_data = [
-            request.form['Tenure'],
-            request.form['Citytier'],
-            request.form['Warehousetohome'],
-            request.form['Gender'],
-            request.form['Hourspendonapp'],
-            request.form['Numberofdeviceregistered'],
-            request.form['Satisfactionscore'],
-            request.form['Maritalstatus'],
-            request.form['Numberofaddress'],
-            request.form['Complain'],
-            request.form['Orderamounthikefromlastyear'],
-            request.form['Couponused'],
-            request.form['Ordercount'],
-            request.form['Daysincelastorder'],
-            request.form['Cashbackamount']
+        # Prepare feature array
+        x = np.zeros(len(data_columns))
+        features = [
+            tenure, citytier, warehousetohome, hourspendonapp,
+            numberofdeviceregistered, satisfactionscore, numberofaddress,
+            complain, orderamounthikefromlastyear, couponused, ordercount,
+            daysincelastorder, cashbackamount
         ]
+        x[:13] = features
 
-        # Convert form data to appropriate types if needed
-        form_data = [int(i) if i.isdigit() else i for i in form_data]
+        gender_col = f"gender_{gender.lower()}"
+        marital_col = f"maritalstatus_{maritalstatus.lower()}"
 
-        # Get prediction
-        output_probab = churn_prediction(*form_data)
+        if gender_col in data_columns:
+            x[data_columns.index(gender_col)] = 1
+        if marital_col in data_columns:
+            x[data_columns.index(marital_col)] = 1
 
-        pred = "Churn" if output_probab > 0.4 else "Not Churn"
+        # Prediction and probability
+        prediction = model.predict([x])[0]
+        probabilities = model.predict_proba([x])[0]
+        churn_prob = probabilities[1]  # 1 usually represents churn class
 
-        data = {
-            'prediction': pred,
-            'predict_probabality': output_probab
-        }
+        # Determine labels correctly
+        if prediction == 1:
+            risk = "High Risk"
+            risk_status = "Churn"
+        else:
+            risk = "Low Risk"
+            risk_status = "Retain"
 
-        return render_template('result.html', data=data)
+        return render_template("result.html", data={
+            "risk": risk,
+            "risk_status": risk_status,
+            "predict_probability": round(churn_prob * 100, 2)
+        })
 
-    return render_template('index.html')
+    except Exception as e:
+        return f"Error occurred: {e}"
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    print("🚀 ChurnAI running on http://localhost:5000")
     app.run(debug=True)

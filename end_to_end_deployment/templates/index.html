@@ -1,125 +1,595 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Predict Customer Churn - ChurnAI</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            background-color: #ddefff; /* Light blue background color */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: #0a0e27;
+        color: #fff;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+
+      .bg-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: linear-gradient(
+          135deg,
+          #0a0e27 0%,
+          #1a1f3a 50%,
+          #0a0e27 100%
+        );
+      }
+
+      .bg-animation::before {
+        content: "";
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(99, 102, 241, 0.1) 1px,
+          transparent 1px
+        );
+        background-size: 50px 50px;
+        animation: moveGrid 20s linear infinite;
+      }
+
+      @keyframes moveGrid {
+        0% {
+          transform: translate(0, 0);
         }
+        100% {
+          transform: translate(50px, 50px);
+        }
+      }
+
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.3;
+        animation: float 8s ease-in-out infinite;
+      }
+
+      .orb1 {
+        width: 300px;
+        height: 300px;
+        background: #6366f1;
+        top: 20%;
+        right: 10%;
+      }
+      .orb2 {
+        width: 250px;
+        height: 250px;
+        background: #8b5cf6;
+        bottom: 20%;
+        left: 10%;
+        animation-delay: 2s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        50% {
+          transform: translate(20px, 20px);
+        }
+      }
+
+      nav {
+        padding: 25px 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(10px);
+        background: rgba(10, 14, 39, 0.7);
+        border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+      }
+
+      .logo {
+        font-size: 28px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-decoration: none;
+      }
+
+      .back-btn {
+        padding: 10px 25px;
+        background: rgba(99, 102, 241, 0.2);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 20px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .back-btn:hover {
+        background: rgba(99, 102, 241, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 50px auto;
+        padding: 0 20px 50px;
+      }
+
+      .form-header {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+
+      .form-header h1 {
+        font-size: 48px;
+        font-weight: 800;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #fff, #6366f1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .form-header p {
+        color: #a0a0c0;
+        font-size: 18px;
+      }
+
+      .form-card {
+        background: rgba(26, 31, 58, 0.5);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 30px;
+        padding: 50px;
+        backdrop-filter: blur(10px);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group label {
+        color: #a0a0c0;
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .form-group input,
+      .form-group select {
+        padding: 15px 20px;
+        background: rgba(10, 14, 39, 0.6);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 15px;
+        color: white;
+        font-size: 16px;
+        font-family: "Inter", sans-serif;
+        transition: all 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+      }
+
+      .form-group input::placeholder {
+        color: rgba(160, 160, 192, 0.5);
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border: none;
+        border-radius: 20px;
+        color: white;
+        font-weight: 700;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        margin-top: 20px;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+      }
+
+      .section-divider {
+        margin: 40px 0 30px;
+        text-align: center;
+        position: relative;
+      }
+
+      .section-divider::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(99, 102, 241, 0.3),
+          transparent
+        );
+      }
+
+      .section-divider span {
+        background: rgba(26, 31, 58, 0.8);
+        padding: 0 20px;
+        position: relative;
+        color: #6366f1;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 14px;
+      }
+
+      @media (max-width: 768px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        .form-card {
+          padding: 30px 20px;
+        }
+        .form-header h1 {
+          font-size: 36px;
+        }
+        nav {
+          padding: 20px;
+        }
+      }
+
+      .quick-fill {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .quick-fill-btn {
+        padding: 12px 25px;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        color: #6366f1;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+      }
+
+      .quick-fill-btn:hover {
+        background: #6366f1;
+        color: white;
+        transform: scale(1.05);
+      }
     </style>
-    <title>Churn | Customer Churn Prediction</title>
-</head>
-<body>
-    <div class="container">
-        <div class="py-5 text-center">
-            <img class="d-block mx-auto mb-4" src="/end_to_end_deployment/static/img/churn.jpg" alt="" style="width: 150px; height: auto;">
-            <h2>Customer Churn Prediction</h2>
-            <p class="lead">Fill the values below to predict Customer Churn</p>
-        </div>
-        <div class="row">
-            <div class="col-md-2"></div>
-            <div class="col-md-12">
-                <h4 class="mb-3">Customer Details</h4>
-                <form action="{{ url_for('index_page')}}" method="post" class="needs-validation">
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label for="Tenure">Tenure</label>
-                            <input type="text" class="form-control" id="Tenure" name="Tenure" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="Citytier">City Tier</label>
-                            <input type="text" class="form-control" id="Citytier" name="Citytier" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="Warehousetohome">Warehouse To Home</label>
-                            <input type="text" class="form-control" id="Warehousetohome" name="Warehousetohome" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="Gender">Gender</label>
-                            <select id="Gender" name="Gender" class="form-control" required>
-                                <option value="" selected></option>
-                                <option value="female">Female</option>
-                                <option value="male">Male</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row">    
-                        <div class="col-md-3 mb-3">
-                            <label for="Hourspendonapp">Hour Spend On App</label>
-                            <input type="text" class="form-control" id="Hourspendonapp" name="Hourspendonapp" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="Numberofdeviceregistered">Number Of Device Registered</label>
-                            <input type="text" class="form-control" id="Numberofdeviceregistered" name="Numberofdeviceregistered" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="Satisfactionscore">Satisfaction Score</label>
-                            <input type="text" class="form-control" id="Satisfactionscore" name="Satisfactionscore" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="Maritalstatus">Marital Status</label>
-                            <select id="Maritalstatus" name="Maritalstatus" class="form-control" required>
-                                <option value="" selected></option>
-                                <option value="divorced">Divorced</option>
-                                <option value="married">Married</option>
-                                <option value="single">Single</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label for="Numberofaddress">Number Of Address</label>
-                            <input type="text" class="form-control" id="Numberofaddress" name="Numberofaddress" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="Complain">Complain</label>
-                            <input type="text" class="form-control" id="Complain" name="Complain" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="Orderamounthikefromlastyear">Order Amount Hike From Last Year</label>
-                            <input type="text" class="form-control" id="Orderamounthikefromlastyear" name="Orderamounthikefromlastyear" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="Couponused">Coupon Used</label>
-                            <input type="text" class="form-control" id="Couponused" name="Couponused" placeholder="" value="" required>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="Ordercount">Order Count</label>
-                            <input type="text" class="form-control" id="Ordercount" name="Ordercount" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="Daysincelastorder">Day(s) Since Last Order</label>
-                            <input type="text" class="form-control" id="Daysincelastorder" name="Daysincelastorder" placeholder="" value="" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="Cashbackamount">Cashback Amount</label>
-                            <input type="text" class="form-control" id="Cashbackamount" name="Cashbackamount" placeholder="" value="" required>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary btn-lg btn-block" type="submit">Predict</button>
-                </form>
-            </div>
-            <div class="col-md-2"></div>
-        </div>
-        <footer class="my-5 pt-5 text-muted text-center text-small">
-            <p class="mb-1">&copy; 2024 - Allan Ouko</p>
-
-        </footer>
+  </head>
+  <body>
+    <div class="bg-animation">
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
     </div>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
-</body>
+
+    <nav>
+      <a href="/" class="logo">ChurnAI</a>
+      <a href="/" class="back-btn">← Back to Home</a>
+    </nav>
+
+    <div class="container">
+      <div class="form-header">
+        <h1>Customer Churn Prediction</h1>
+        <p>Enter customer data below to predict churn probability</p>
+      </div>
+
+      <div class="form-card">
+        <form action="/predict" method="POST" id="churnForm">
+          <div class="section-divider">
+            <span>Customer Demographics</span>
+          </div>
+
+          <div class="quick-fill">
+            <button
+              type="button"
+              class="quick-fill-btn"
+              onclick="fillHighRisk()"
+            >
+              ⚠️ Load High Risk Example
+            </button>
+            <button
+              type="button"
+              class="quick-fill-btn"
+              onclick="fillLowRisk()"
+            >
+              ✅ Load Low Risk Example
+            </button>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Gender</label>
+              <select id="Gender" name="gender" required>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Marital Status</label>
+              <select id="Maritalstatus" name="maritalstatus" required>
+                <option value="single">Single</option>
+                <option value="married">Married</option>
+                <option value="divorced">Divorced</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span>Account Information</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tenure (months)</label>
+              <input
+                type="number"
+                id="Tenure"
+                name="tenure"
+                placeholder="e.g., 12"
+                step="0.01"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>City Tier (1-3)</label>
+              <input
+                type="number"
+                id="Citytier"
+                name="citytier"
+                placeholder="e.g., 1"
+                step="1"
+                min="1"
+                max="3"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Number of Devices Registered</label>
+              <input
+                type="number"
+                id="Numberofdeviceregistered"
+                name="numberofdeviceregistered"
+                placeholder="e.g., 3"
+                step="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Number of Addresses</label>
+              <input
+                type="number"
+                id="Numberofaddress"
+                name="numberofaddress"
+                placeholder="e.g., 2"
+                step="1"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span>Engagement Metrics</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Hours Spent on App</label>
+              <input
+                type="number"
+                id="Hourspendonapp"
+                name="hourspendonapp"
+                placeholder="e.g., 3.5"
+                step="0.01"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Satisfaction Score (1-5)</label>
+              <input
+                type="number"
+                id="Satisfactionscore"
+                name="satisfactionscore"
+                placeholder="e.g., 4"
+                step="1"
+                min="1"
+                max="5"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Complain (0=No, 1=Yes)</label>
+              <input
+                type="number"
+                id="Complain"
+                name="complain"
+                placeholder="0 or 1"
+                step="1"
+                min="0"
+                max="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Days Since Last Order</label>
+              <input
+                type="number"
+                id="Daysincelastorder"
+                name="daysincelastorder"
+                placeholder="e.g., 5"
+                step="1"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span>Order & Financial Data</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Order Count</label>
+              <input
+                type="number"
+                id="Ordercount"
+                name="ordercount"
+                placeholder="e.g., 15"
+                step="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Coupon Used</label>
+              <input
+                type="number"
+                id="Couponused"
+                name="couponused"
+                placeholder="e.g., 5"
+                step="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Order Amount Hike from Last Year (%)</label>
+              <input
+                type="number"
+                id="Orderamounthikefromlastyear"
+                name="orderamounthikefromlastyear"
+                placeholder="e.g., 15"
+                step="0.01"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Cashback Amount</label>
+              <input
+                type="number"
+                id="Cashbackamount"
+                name="cashbackamount"
+                placeholder="e.g., 150.50"
+                step="0.01"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span>Logistics</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Warehouse to Home Distance (km)</label>
+              <input
+                type="number"
+                id="Warehousetohome"
+                name="warehousetohome"
+                placeholder="e.g., 12.5"
+                step="0.01"
+                required
+              />
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            🔮 Predict Churn Risk
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      function fillHighRisk() {
+        document.getElementById("Tenure").value = "1"; // Very new customer
+        document.getElementById("Citytier").value = "3"; // Smaller city tier
+        document.getElementById("Warehousetohome").value = "50"; // Very long delivery distance
+        document.getElementById("Gender").value = "male"; // (neutral, just example)
+        document.getElementById("Hourspendonapp").value = "0.5"; // Rarely uses app
+        document.getElementById("Numberofdeviceregistered").value = "1"; // Only 1 device
+        document.getElementById("Satisfactionscore").value = "1"; // Very low satisfaction
+        document.getElementById("Maritalstatus").value = "single"; // (neutral)
+        document.getElementById("Numberofaddress").value = "5"; // Multiple addresses → unstable
+        document.getElementById("Complain").value = "1"; // Has complained
+        document.getElementById("Orderamounthikefromlastyear").value = "5"; // Small hike → low loyalty
+        document.getElementById("Couponused").value = "0"; // Not using offers
+        document.getElementById("Ordercount").value = "2"; // Very few orders
+        document.getElementById("Daysincelastorder").value = "60"; // Long gap since last order
+        document.getElementById("Cashbackamount").value = "10"; // Low cashback → low satisfaction
+      }
+
+      function fillLowRisk() {
+        document.getElementById("Tenure").value = "3";
+        document.getElementById("Citytier").value = "3";
+        document.getElementById("Warehousetohome").value = "25";
+        document.getElementById("Gender").value = "male";
+        document.getElementById("Hourspendonapp").value = "1";
+        document.getElementById("Numberofdeviceregistered").value = "1";
+        document.getElementById("Satisfactionscore").value = "2";
+        document.getElementById("Maritalstatus").value = "single";
+        document.getElementById("Numberofaddress").value = "5";
+        document.getElementById("Complain").value = "1";
+        document.getElementById("Orderamounthikefromlastyear").value = "5";
+        document.getElementById("Couponused").value = "2";
+        document.getElementById("Ordercount").value = "5";
+        document.getElementById("Daysincelastorder").value = "30";
+        document.getElementById("Cashbackamount").value = "50";
+      }
+    </script>
+  </body>
 </html>
