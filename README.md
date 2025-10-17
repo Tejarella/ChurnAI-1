@@ -14,8 +14,7 @@
 
 | Home Page | Form Page |
 |-----------|----------------|
-| ![Home](92553.png)" />
-) | ![Prediction](92645.png) |
+| ![Home](92553.png)"| ![Prediction](92645.png) |
 
 | Data Insights | Model Accuracy |
 |---------------|----------------|
